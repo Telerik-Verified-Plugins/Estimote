@@ -1,32 +1,43 @@
 var cordova = require('cordova');
 var exec = require('cordova/exec');
 
-function Estimote(){
-}
+function Estimote() {}
 
-Estimote.prototype.startRanging = function(arg) {
-  var options = {};
-
-  // added for backward compatibility
-  if (typeof arg == "object") {
-    options = arg;
-  } else if (typeof arg == "string") {
-    options.region = arg;
-  }
-
-  exec(estimote._notification, estimote._error, "Estimote", "startRanging", [options]);
+Estimote.prototype.startRanging = function startRanging(region) {
+    
+    var options = {};
+    
+    if(typeof region === 'object') {
+      options = region;
+    } else if ( typeof region === 'string' ) {
+      options.region = region;
+    } 
+    
+    return new Promise( function(resolve, reject) {
+      /**
+       * all the usability of _notification + more. 
+       **/
+      var resolve_function = function(info) {
+        if( info.beacons.length > 0) {
+          cordova.fireDocumentEvent('beaconsReceived', info);
+          resolve(info);
+        }
+      }
+      /** 
+       *  Actually make the error useful! 
+       **/
+      var reject_function = function(error) {
+        console.error(error);
+        reject(error);
+      }
+      
+      exec(resolve_function, reject_function, 'Estimote', 'startRanging', [options] );
+      
+    });
 };
 
 Estimote.prototype.stopRanging = function() {
-  exec(null, null, "Estimote", "stopRanging", []);
-};
-
-Estimote.prototype._notification = function(info) {
-  cordova.fireDocumentEvent("beaconsReceived", info);
-};
-
-Estimote.prototype._error = function(e) {
-  console.log("Error receiving message: " + e);
+  exec(null, null, 'Estimote', 'stopRanging', []);
 };
 
 var estimote = new Estimote();

@@ -2,6 +2,7 @@ package com.estimote.sdk;
 
 import android.os.RemoteException;
 import android.util.Log;
+import java.util.UUID;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
@@ -13,7 +14,8 @@ import java.util.List;
 
 public class EstimotePlugin extends CordovaPlugin {
 
-  private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
+  private static final UUID ESTIMOTE_PROXIMITY_UUID = UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D");//UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D");//"B9407F30-F5F8-466E-AFF9-25556B57FE6D""23A01AF0-232A-4518-9C0E-323FB773F5EF";
+  //private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";//UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D");//"B9407F30-F5F8-466E-AFF9-25556B57FE6D""23A01AF0-232A-4518-9C0E-323FB773F5EF";    
 
   private static final String ESTIMOTE_PLUGIN_PARAM_REGION = "region";
   private static final String ESTIMOTE_PLUGIN_PARAM_UUID = "uuid";
@@ -46,19 +48,23 @@ public class EstimotePlugin extends CordovaPlugin {
     JSONObject options = args.getJSONObject(0);
     region = new Region(
         options.getString(ESTIMOTE_PLUGIN_PARAM_REGION),
-        options.has(ESTIMOTE_PLUGIN_PARAM_UUID) ? options.getString(ESTIMOTE_PLUGIN_PARAM_UUID) : ESTIMOTE_PROXIMITY_UUID,
+        options.has(ESTIMOTE_PLUGIN_PARAM_UUID) ? UUID.fromString(options.getString(ESTIMOTE_PLUGIN_PARAM_UUID)) : ESTIMOTE_PROXIMITY_UUID,
+        //options.has(ESTIMOTE_PLUGIN_PARAM_UUID) ? options.getString(ESTIMOTE_PLUGIN_PARAM_UUID) : ESTIMOTE_PROXIMITY_UUID,
+        //ESTIMOTE_PROXIMITY_UUID,
+        //null,
         null,
         null);
 
-    Log.d(LOG_TAG, "startRanging-method called");
+    Log.d(LOG_TAG, "startRanging-method called: "+region.getProximityUUID().toString());
 
     rangingCallback = callbackCtx;
     try {
       beaconManager = new BeaconManager(cordova.getActivity().getBaseContext());
-
+ Log.d(LOG_TAG, "new Beacon manager created");
       beaconManager.setRangingListener(new BeaconManager.RangingListener() {
+           
         @Override
-        public void onBeaconsDiscovered(Region region, List<Beacon> beacons) {
+        public void onBeaconsDiscovered(Region region, final List<Beacon> beacons) {
           Log.d(LOG_TAG, "Ranged beacons: " + beacons);
 
           JSONObject device = new JSONObject();
@@ -67,9 +73,9 @@ public class EstimotePlugin extends CordovaPlugin {
           try {
             for (Beacon b : beacons) {
 
-              String name = b.getName();
-              String address = b.getMacAddress();
-              String proximityUUID = b.getProximityUUID();
+              String name = b.getProximityUUID().toString();//getName();
+              String address = b.getMacAddress().toString();
+              String proximityUUID = b.getProximityUUID().toString();
 
               JSONObject beacon = new JSONObject();
 

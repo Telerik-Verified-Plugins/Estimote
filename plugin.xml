@@ -65,10 +65,15 @@
       <config-file target="AndroidManifest.xml" parent="/manifest">
           <uses-permission android:name="android.permission.BLUETOOTH" />
           <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+      <!-- Needed for Bluetooth scanning on Android M and above. -->
+		  <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION"/>
       </config-file>
+      
+      
 
       <config-file target="AndroidManifest.xml" parent="/manifest/application">
           <service android:name="com.estimote.sdk.service.BeaconService" android:exported="false" />
+          <receiver android:name="com.estimote.sdk.service.BeaconService$ScanAlarmBroadcastReceiver"/>
       </config-file>
 
       <source-file src="src/android/EstimotePlugin.java" target-dir="src/com/estimote/sdk" />
